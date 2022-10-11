@@ -124,7 +124,6 @@ photo_downloads = "") {
             console.error(err);
             throw new Error(`Error while fetching update:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
         }
-        if (task.state === "pending") console.warn("Warning: task is pending");
 
         if (inter) {
 			await mkdirp(`${download_dir}/${photo_downloads}/`);
@@ -145,7 +144,7 @@ photo_downloads = "") {
             task,
             inter: inter_finished
         });
-        await (new Promise((res) => setTimeout(res, 1000)));
+        await (new Promise((res) => setTimeout(res, 1500)));
     }
 
     update_fn({

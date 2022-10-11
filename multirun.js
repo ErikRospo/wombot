@@ -56,6 +56,9 @@ function handler(data, prefix, style) {
             break;
     }
 }
+function getTaskName(z){
+    return String(z[0] + "/" + String(stylesmap.default.get(z[1]))).replace(/ /g, "_").replace(/\./g, "")
+}
 async function main() {
     let start = Date.now();
     for (let n = 0; n < blockNumber; n++) {
@@ -63,7 +66,7 @@ async function main() {
         for (let m = 0; m < blockSize; m++) {
             let task_index = n * blockSize + m;
             let z = zipped[task_index];
-            let task_name = String(z[0] + "-" + String(stylesmap.default.get(z[1]))).replace(/ /g, "_").replace(/\./g, "")
+            let task_name=getTaskName(z)
             let task = wombot(z[0], z[1], (data) => { handler(data, task_name + ": ", z[1]) }, { final: true, inter: false, download_dir: "./generated/" + task_name })
             tasks.push(task);
         }
@@ -73,7 +76,7 @@ async function main() {
     let tasks = []
     for (let m = blockNumber * blockSize; m < zipped.length; m++) {
         let z = zipped[m];
-        let task_name = String(z[0] + "-" + String(stylesmap.default.get(z[1]))).replace(/ /g, "_").replace(/\./g, "")
+        let task_name=getTaskName(z)
         let task = wombot(z[0], z[1], (data) => { handler(data, task_name + ": ", z[1]) }, { final: true, inter: false, download_dir: "./generated/" + task_name })
         tasks.push(task);
     }

@@ -71,6 +71,8 @@ wombot("Your prompt", 10, (data) => {
     console.error(err);
 });
 ```
+## Errors
+For common errors, refer to `ERRORS.md`
 
 ## Disclaimer
 
