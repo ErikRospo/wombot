@@ -3,3 +3,5 @@ node_modules
 *.jpg
 generated/*
 identityToolkit.json
+prompt.txt
+styles.txt
