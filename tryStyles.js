@@ -92,7 +92,7 @@ async function main() {
             s+="steps.set("+n+","+task_lengths[n]+");\n"
         }    
     }
-    s+="module.exports.steps=steps;"
+    s+="module.exports.steps=steps;\n\n"
     fs.writeFileSync("./next_data_template.js",s);
 }
 main()
