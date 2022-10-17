@@ -1,4 +1,4 @@
-//1665425497120
+//1666026450700
 let styles = new Map();
 styles.set(1,"Synthwave");
 styles.set(2,"Ukiyoe");
@@ -10,12 +10,10 @@ styles.set(7,"HD");
 styles.set(9,"Psychic");
 styles.set(10,"Dark Fantasy");
 styles.set(11,"Mystical");
-styles.set(13,"Baroque");
 styles.set(14,"Etching");
 styles.set(16,"Wuhtercuhler");
 styles.set(17,"Provenance");
 styles.set(18,"Rose Gold");
-styles.set(20,"Blacklight");
 styles.set(21,"Psychedelic");
 styles.set(22,"Ghibli");
 styles.set(28,"Melancholic");
@@ -25,8 +23,10 @@ styles.set(32,"Realistic");
 styles.set(34,"Arcane");
 styles.set(35,"Throwback");
 styles.set(36,"Daydream");
+styles.set(37,"Surreal");
 styles.set(39,"Pandora");
 styles.set(40,"Malevolent");
+styles.set(41,"Street Art");
 styles.set(44,"Meme");
 styles.set(45,"Comic");
 styles.set(47,"Line-Art");
