@@ -3,7 +3,6 @@
 const task = require("./index.js");
 const styles = require("./styles.js");
 const fs = require("fs");
-const path=require("path");
 const yargs = require("yargs");
 const { hideBin } = require("yargs/helpers");
 const {update}=require("./get_next_data.js")

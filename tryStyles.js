@@ -93,6 +93,6 @@ async function main() {
         }    
     }
     s+="module.exports.steps=steps;"
-    fs.writeFileSync("./next_data_template",s);
+    fs.writeFileSync("./next_data_template.js",s);
 }
 main()

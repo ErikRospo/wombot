@@ -3,7 +3,6 @@ const identify = require("./identify.js");
 const download = require("./download.js");
 const mkdirp = require("mkdirp");
 const path = require("path");
-const fs = require("fs");
 
 
 let paint_rest = new Rest("paint.api.wombo.ai", 100);
