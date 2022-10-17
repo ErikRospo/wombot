@@ -65,7 +65,7 @@ async function main() {
         console.log(`Block ${n + 1}/${blockNumber} done`)
     }
     let tasks = []
-    for (let m = blockNumber * blockSize; m < numITs.length; m++) {
+    for (let m = blockNumber * blockSize; m < numITs; m++) {
         task_lengths.push(0)
         task_works.push(true)
         let task = wombot(prompt, m, (data) => { handler(data,"",0) }, { final: false, inter: false, download_dir: "/tmp/"  ,ignore_errors:true}).then((val)=>{
@@ -76,7 +76,7 @@ async function main() {
                 task_works[m]=false
                 task_lengths[m]=-1
             }
-            console.log(`task #${task_index+1} done`)
+            console.log(`task #${m+1} done`)
             
         })
         tasks.push(task);
@@ -84,7 +84,7 @@ async function main() {
     await Promise.all(tasks);
     let end = Date.now();
     console.log(`Done in ${(end - start) / 1000}s`)
-    s=""
+    let s=""
     s+="let steps= new Map();\n"
     
     for (let n=0;n<numITs;n++){

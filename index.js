@@ -9,7 +9,7 @@ const fs = require("fs");
 let paint_rest = new Rest("paint.api.wombo.ai", 100);
 let image_paint_rest = new Rest("www.wombo.art", 100);
 
-module.exports = async function task(prompt, style, update_fn = () => {}, settings = {},
+module.exports = async function task(/** @type {string} */ prompt, /** @type {number} */ style, update_fn = (/** @type {any} */ _status) => {}, settings = {},
 inputImage = {},
 photo_downloads = "") {
     let {final = true, inter = false, identify_key, download_dir = "./generated/",ignoreError=false} = settings;
@@ -184,7 +184,9 @@ photo_downloads = "") {
         url: task.result.final,
         inter: inter_finished,
     });
+    let download_path
     if (final) {
+        
 		download_path = path.join(download_dir, `${task.id}-final.jpg`);
 		download_path = path.resolve(download_path);
 	}

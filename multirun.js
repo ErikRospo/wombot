@@ -3,15 +3,15 @@ const stylesmap = require("./styles.js");
 const fs = require("fs");
 
 let prompts = fs.readFileSync("prompts.txt", "utf-8").split("\n");
-let styles = fs.readFileSync("styles.txt", "utf-8").split("\n");
+let stylesOld = fs.readFileSync("styles.txt", "utf-8").split("\n");
 prompts = prompts.filter((f) => { return f.length > 2 })
-styles = styles.map((f) => { return Number(f) });
+let styles = stylesOld.map((f) => { return Number(f) });
 styles = styles.filter((f) => { return f > 0 });
 let numPoS = Math.max(prompts.length, styles.length)
 let zipped = []
 for (let n = 0; n < numPoS; n++) {
-    s = 0
-    p = ""
+    let s = 0
+    let p = ""
     if (n >= (styles.length)) {
         s = styles[styles.length - 1]
     } else {

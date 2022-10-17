@@ -68,7 +68,7 @@ if (!styles.default.has(+argc._[1])) {
     for (let [id, name] of styles.default) {
         console.log(id + " -> " + name);
     }
-    return;
+    yargs.exit(1,`Invalid style: expected a number between 1 and ${numstyles}!`);
 }
 
 const quiet = argc.quiet;
@@ -77,9 +77,11 @@ const final = !argc.nofinal;
 const update_styles_js=argc.styleupdate;
 const download_dir="./generated/"+((argc.dir==undefined)?"":argc.dir)
 console.log(`out: ${download_dir}`);
-let image=false
+let image;
 if (argc.inputImage){
     image=fs.readFileSync(argc.inputImage).toString("base64")
+} else{
+    image=false
 }
 async function generate(prompt, style, prefix, input_image = false) {
     function handler(data, prefix) {
@@ -131,6 +133,7 @@ async function generate(prompt, style, prefix, input_image = false) {
 
 (async () => {
     let prompt = argc._[0];
+
     let style = +argc._[1] || 3;
     if (!quiet)
         console.log(`Prompt: \`${prompt}\`, Style: \`${styles.default.get(style)}\``);
@@ -138,6 +141,7 @@ async function generate(prompt, style, prefix, input_image = false) {
         console.log("Updating styles.js")
     }
     update(update_styles_js)
+
     for (let n = 0; n < +argc.times; n++) {
         const prefix = argc.times == 1 ? `` : `${n+1}: `;
         if (argc.noasync) await generate(prompt, style, prefix,image);
