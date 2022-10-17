@@ -1,8 +1,12 @@
 const wombot = require("./index.js");
 const stylesmap = require("./styles.js");
 const fs = require("fs");
-
-let numITs = 60
+let stys=JSON.parse(fs.readFileSync("styles.json",{"encoding":"utf-8"}))
+let maxv=0
+for (let n=0;n<stys.length;n++){
+    maxv=Math.max(maxv,stys[n].id)
+}
+let numITs = Math.ceil(maxv/10)*10;
 let blockSize = 5;
 const quiet = true
 let blockNumber = Math.floor(numITs / blockSize);
@@ -52,6 +56,8 @@ async function main() {
                     task_works[task_index]=false
                     task_lengths[task_index]=-1
                 }
+            console.log(`task #${task_index+1} done`)
+                
             })
             tasks.push(task);
         }
@@ -60,7 +66,19 @@ async function main() {
     }
     let tasks = []
     for (let m = blockNumber * blockSize; m < numITs.length; m++) {
-        let task = wombot(prompt, m, (data) => { handler(data, "",0) }, { final: true, inter: false, download_dir: "./generated/" + task_name,ignore_errors:true })
+        task_lengths.push(0)
+        task_works.push(true)
+        let task = wombot(prompt, m, (data) => { handler(data,"",0) }, { final: false, inter: false, download_dir: "/tmp/"  ,ignore_errors:true}).then((val)=>{
+            try{
+                task_lengths[m]=val.task.generated_photo_keys.length
+                task_works[m]=true
+            } catch{
+                task_works[m]=false
+                task_lengths[m]=-1
+            }
+            console.log(`task #${task_index+1} done`)
+            
+        })
         tasks.push(task);
     }
     await Promise.all(tasks);
