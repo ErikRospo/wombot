@@ -85,7 +85,9 @@ photo_downloads = "") {
         
         throw new Error(`Error while allocating a new task:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
     }
-        return task
+    return {task,style}
+    
+        // return task
     }
     let task_path = "/api/tasks/" + task.id;
 
@@ -123,7 +125,9 @@ photo_downloads = "") {
             
         throw new Error(`Error while sending prompt:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
     }
-    return task
+    return {task,style}
+    
+    // return task
 }
 
     update_fn({
@@ -151,7 +155,9 @@ photo_downloads = "") {
             if (ignoreError){
             throw new Error(`Error while getting task:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
             }
-            return task
+        return {task,style}
+            
+            // return task
         }
 
         if (inter) {
@@ -205,7 +211,7 @@ photo_downloads = "") {
         
         throw new Error(`Error while downloading results:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
         }
-        return task
+        return {task,style}
     }
 
     update_fn({
@@ -224,6 +230,7 @@ photo_downloads = "") {
         url: task.result.final,
         path: final ? download_path : null,
         inter: inter_finished,
+        style
     };
 }
 

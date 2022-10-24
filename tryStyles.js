@@ -1,98 +1,104 @@
 const wombot = require("./index.js");
 const stylesmap = require("./styles.js");
 const fs = require("fs");
-let stys=JSON.parse(fs.readFileSync("styles.json",{"encoding":"utf-8"}))
-let maxv=0
-for (let n=0;n<stys.length;n++){
-    maxv=Math.max(maxv,stys[n].id)
+let stys = JSON.parse(fs.readFileSync("styles.json", { encoding: "utf-8" }));
+let maxv = 0;
+for (let n = 0; n < stys.length; n++) {
+  maxv = Math.max(maxv, stys[n].id);
 }
-let numITs = Math.ceil(maxv/10)*10;
-let blockSize = 5;
-const quiet = true
-let blockNumber = Math.floor(numITs / blockSize);
-let prompt="test"
+let numITs = (Math.ceil(maxv / 10)+1) * 10;
+const quiet = true;
+let prompt = "test";
 function handler(data, prefix, style) {
-    switch (data.state) {
-        case "authenticated":
-            if (!quiet) console.log(`${prefix}Authenticated, allocating a task...`);
-            break;
-        case "allocated":
-            if (!quiet) console.log(`${prefix}Allocated, submitting the prompt and style...`);
-            break;
-        case "submitted":
-            if (!quiet) console.log(`${prefix}Submitted! Waiting on results...`);
-            break;
-        case "progress":
-            let current = data.task.photo_url_list.length;
-            let max = stylesmap.steps.get(style) + 1;
-            if (!max) {
-                max = 20;
-            }
-            if (!quiet) console.log(`${prefix}Submitted! Waiting on results... (${current}/${max})`);
-            break;
-        case "generated":
-            if (!quiet) console.log(`${prefix}Results are in, downloading the final image...`);
-            break;
-        case "downloaded":
-            if (!quiet) console.log(`${prefix}Downloaded!`);
-            break;
-    }
+  switch (data.state) {
+    case "authenticated":
+      if (!quiet) console.log(`${prefix}Authenticated, allocating a task...`);
+      break;
+    case "allocated":
+      if (!quiet)
+        console.log(`${prefix}Allocated, submitting the prompt and style...`);
+      break;
+    case "submitted":
+      if (!quiet) console.log(`${prefix}Submitted! Waiting on results...`);
+      break;
+    case "progress":
+      let current = data.task.photo_url_list.length;
+      let max = stylesmap.steps.get(style) + 1;
+      if (!max) {
+        max = 20;
+      }
+      if (!quiet)
+        console.log(
+          `${prefix}Submitted! Waiting on results... (${current}/${max})`
+        );
+      break;
+    case "generated":
+      if (!quiet)
+        console.log(`${prefix}Results are in, downloading the final image...`);
+      break;
+    case "downloaded":
+      if (!quiet) console.log(`${prefix}Downloaded!`);
+      break;
+  }
 }
 async function main() {
-    let task_lengths=[]
-    let task_works=[]
-    let start = Date.now();
-    for (let n = 0; n < blockNumber; n++) {
-        let tasks = [];
-        for (let m = 0; m < blockSize; m++) {
-            let task_index = n * blockSize + m;
-            task_lengths.push(0)
-            task_works.push(true)
-            let task = wombot(prompt, task_index, (data) => { handler(data,"",0) }, { final: false, inter: false, download_dir: "/tmp/"  ,ignore_errors:true}).then((val)=>{
-                try{
-                    task_lengths[task_index]=val.task.generated_photo_keys.length
-                    task_works[task_index]=true
-                } catch{
-                    task_works[task_index]=false
-                    task_lengths[task_index]=-1
-                }
-            console.log(`task #${task_index+1} done`)
-                
-            })
-            tasks.push(task);
+  let task_lengths = [];
+  let task_works = [];
+  let tasks_done = 0;
+  let alltasks = [];
+  let task_index=0;
+  function checkStyle() {
+    if (task_index < numITs) {
+      console.log(`Task #${task_index + 1} started`);
+
+      task_lengths.push(0);
+      task_works.push(true);
+      task_index++;
+
+      let t = wombot(
+        prompt,
+        task_index,
+        (data) => {
+          handler(data, "", 0);
+        },
+        {
+          final: false,
+          inter: false,
+          download_dir: "/tmp/",
+          ignore_errors: true,
         }
-        await Promise.all(tasks);
-        console.log(`Block ${n + 1}/${blockNumber} done`)
-    }
-    let tasks = []
-    for (let m = blockNumber * blockSize; m < numITs; m++) {
-        task_lengths.push(0)
-        task_works.push(true)
-        let task = wombot(prompt, m, (data) => { handler(data,"",0) }, { final: false, inter: false, download_dir: "/tmp/"  ,ignore_errors:true}).then((val)=>{
-            try{
-                task_lengths[m]=val.task.generated_photo_keys.length
-                task_works[m]=true
-            } catch{
-                task_works[m]=false
-                task_lengths[m]=-1
+      ).then((val) => {
+        try {
+            if (val.task.generated_photo_keys.length>0){
+            task_works[val.style] = true;
+          task_lengths[val.style] = val.task.generated_photo_keys.length;
             }
-            console.log(`task #${m+1} done`)
-            
-        })
-        tasks.push(task);
+        } catch {
+          task_works[val.style] = false;
+          task_lengths[val.style] = -1;
+        }
+        tasks_done += 1;
+        console.log(`Task #${val.style + 1} done, ${tasks_done} total done. ${task_works[val.style]?"Works in "+task_lengths[val.style]+" steps":""}`);
+
+        checkStyle();
+      });
+      alltasks.push(t);
     }
-    await Promise.all(tasks);
-    let end = Date.now();
-    console.log(`Done in ${(end - start) / 1000}s`)
-    let s=""
-    s+="let steps= new Map();\n"
-    
-    for (let n=0;n<numITs;n++){
-        if (task_works[n]){
-            s+="steps.set("+n+","+task_lengths[n]+");\n"
-        }    
+  }
+  for (let n = 0; n < 5; n++) {
+    checkStyle();
+    await new Promise((res) => setTimeout(res, 2000));
+  }
+  await Promise.all(alltasks)
+  let s = "";
+  s += "let steps= new Map();\n";
+
+  for (let n = 0; n < numITs; n++) {
+    if (task_works[n]&task_lengths[n]>0) {
+      s += "steps.set(" + n + "," + task_lengths[n] + ");\n";
     }
-    s+="module.exports.steps=steps;\n\n"
-    fs.writeFileSync("./next_data_template.js",s);
+  }
+  s += "module.exports.steps=steps;\n\n";
+  fs.writeFileSync("./next_data_template.js", s);
 }
-main()
+main();
