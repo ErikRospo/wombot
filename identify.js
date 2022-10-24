@@ -40,8 +40,12 @@ function identify(identify_key) {
                 key: identify_key
             });
             identify_cache = res.idToken;
-            identify_timeout = new Date().getTime() + 1000 * +res.expiresIn;
-            fs.writeFileSync("./identityToolkit.json",JSON.stringify({"id":res.idToken,"timeout":identify_timeout}))
+            //we want to get a new token before the token actually expires, just to be safe.
+            identify_timeout = new Date().getTime() + 1000 * (+res.expiresIn-120); //120 seconds, or 2 minutes.
+            //however, we do also store the actual timeout just in case something wants to use that instead.
+            let identify_timeout2 = new Date().getTime() + 1000 * (+res.expiresIn);
+            
+            fs.writeFileSync("./identityToolkit.json",JSON.stringify({"id":res.idToken,"timeout":identify_timeout,"actual_timeout":identify_timeout2,"response":res}))
 		resolve(identify_cache);
         });
     } else {

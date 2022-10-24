@@ -3,16 +3,15 @@ const identify = require("./identify.js");
 const download = require("./download.js");
 const mkdirp = require("mkdirp");
 const path = require("path");
-const fs = require("fs");
 
 
 let paint_rest = new Rest("paint.api.wombo.ai", 100);
 let image_paint_rest = new Rest("www.wombo.art", 100);
 
-module.exports = async function task(prompt, style, update_fn = () => {}, settings = {},
+module.exports = async function task(/** @type {string} */ prompt, /** @type {number} */ style, update_fn = (/** @type {any} */ _status) => {}, settings = {},
 inputImage = {},
 photo_downloads = "") {
-    let {final = true, inter = false, identify_key, download_dir = "./generated/"} = settings;
+    let {final = true, inter = false, identify_key, download_dir = "./generated/",ignoreError=false} = settings;
     let {
 		input_image = false,
 		media_suffix = null,
@@ -24,9 +23,12 @@ photo_downloads = "") {
     try {
         id = await identify(identify_key);
     } catch (err) {
-        console.error(err);
+        
+        if (ignoreError){
+        
         throw new Error(`Error while sending prompt:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
     }
+}
     let mediastoreid;
 	if (input_image) {
 		image_paint_rest.custom_headers = {
@@ -73,10 +75,20 @@ photo_downloads = "") {
         task = await paint_rest.options("/api/tasks/", "POST")
             .then(() => paint_rest.post("/api/tasks/", {premium: false}));
     } catch (err) {
-        console.error(err);
+        update_fn({
+            state:"error",
+            task,
+            id,
+            error:err
+        })
+        if (ignoreError){
+        
         throw new Error(`Error while allocating a new task:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
     }
-
+    return {task,style}
+    
+        // return task
+    }
     let task_path = "/api/tasks/" + task.id;
 
     update_fn({
@@ -103,9 +115,20 @@ photo_downloads = "") {
         .options(task_path, "PUT")
         .then(() => paint_rest.put(task_path, input_object));
     } catch (err) {
-        console.error(err);
+                    update_fn({
+                state: "error",
+                id,
+                task,
+                error:err,
+            });
+            if (ignoreError){
+            
         throw new Error(`Error while sending prompt:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
     }
+    return {task,style}
+    
+    // return task
+}
 
     update_fn({
         state: "submitted",
@@ -122,7 +145,19 @@ photo_downloads = "") {
             task = await paint_rest.get(task_path, "GET");
         } catch (err) {
             console.error(err);
-            throw new Error(`Error while fetching update:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
+            update_fn({
+                state: "error",
+                id,
+                task,
+                error:err,
+         
+            });
+            if (ignoreError){
+            throw new Error(`Error while getting task:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
+            }
+        return {task,style}
+            
+            // return task
         }
 
         if (inter) {
@@ -154,19 +189,29 @@ photo_downloads = "") {
         url: task.result.final,
         inter: inter_finished,
     });
+    let download_path
     if (final) {
+        
 		download_path = path.join(download_dir, `${task.id}-final.jpg`);
 		download_path = path.resolve(download_path);
 	}
     try {
-        await mkdirp(path.dirname(download_path));
-        fs.writeFileSync(download_path, "", { flag: "w" });
+        if (final) await mkdirp(path.dirname(download_path));
         if (final) await download(task.result.final, download_path);
         if (inter) await Promise.all(inter_downloads);
         if (inter) await Promise.all(inter_downloads);
     } catch (err) {
-        console.error(err);
+        update_fn({
+            state:"error",
+            id,
+            task,
+            error:err
+        })
+        if (ignoreError){
+        
         throw new Error(`Error while downloading results:\n${err.toFriendly ? err.toFriendly() : err.toString()}`);
+        }
+        return {task,style}
     }
 
     update_fn({
@@ -185,6 +230,7 @@ photo_downloads = "") {
         url: task.result.final,
         path: final ? download_path : null,
         inter: inter_finished,
+        style
     };
 }
 

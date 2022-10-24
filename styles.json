@@ -40,10 +40,6 @@
 		"name": "Mystical"
 	},
 	{
-		"id": 13,
-		"name": "Baroque"
-	},
-	{
 		"id": 14,
 		"name": "Etching"
 	},
@@ -58,10 +54,6 @@
 	{
 		"id": 18,
 		"name": "Rose Gold"
-	},
-	{
-		"id": 20,
-		"name": "Blacklight"
 	},
 	{
 		"id": 21,
@@ -100,12 +92,20 @@
 		"name": "Daydream"
 	},
 	{
+		"id": 37,
+		"name": "Surreal"
+	},
+	{
 		"id": 39,
 		"name": "Pandora"
 	},
 	{
 		"id": 40,
 		"name": "Malevolent"
+	},
+	{
+		"id": 41,
+		"name": "Street Art"
 	},
 	{
 		"id": 44,
