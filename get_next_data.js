@@ -14,7 +14,7 @@ function getNEXTdata(force=false){
             return a.id-b.id;
         })
         result=result.filter((f)=>{
-            return !f.is_premium;        
+            return !f.is_premium;
         });
         console.log(result);
         fs.writeFileSync('styles.json',JSON.stringify(result,['id','name'],"\t"))
@@ -30,7 +30,7 @@ function getNEXTdata(force=false){
 
 function updateStylesDotJS(){
     let styles=JSON.parse(String(fs.readFileSync('styles.json')))
-    
+
     let s=`//${Date.now()}\n`
     s+='let styles = new Map();\n';
     //@ts-ignore-errors
